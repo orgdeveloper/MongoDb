@@ -2,6 +2,7 @@
   "name": "Start",
   "version": "1.0.0",
   "dependencies": {
+    "hapi": "^18.1.0",
     "mongodb": "^3.3.0-beta2"
   }
 }
