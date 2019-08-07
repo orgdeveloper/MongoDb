@@ -1,5 +1,15 @@
 const mongodb = require('mongodb');
 const hapi = require('hapi');
+
+
+const MongoClient = mongodb.MongoClient;
+//our host url
+const url = 'mongodb://localhost:27017/';
+// const url = 'mongodb://localhost:27017';
+//specifying out database selection
+const dbName = 'learning_mongo';
+let database = '';
+
 //create a server that listens on port 8080
 const server = hapi.server({
     port: 8080,
@@ -11,9 +21,19 @@ server.route([
     {
         method: 'GET',
         path: '/api/tours',
-        handler: function(request, reply)
+        handler: async(request, reply)=>
         {
-            reply("Getting tour list!");
+            const collection =  database.collection('tours');
+            const result = await (collection.find().toArray((error, tours) =>
+            {
+                // return("Getting tour list!");
+
+                // const response = reply.response(tours);
+                // response.type('text/plain');
+                return tours;
+
+            }));
+            return result;
         }
     },
     // Add new tour
@@ -22,7 +42,7 @@ server.route([
         path: '/api/tours',
         handler: function(request, reply)
         {
-            reply("Adding new tour");
+            return("Adding new tour");
         }
     },
     // Get a single tour
@@ -31,7 +51,7 @@ server.route([
         path: '/api/tours/{name}',
         handler: function(request, reply)
         {
-            reply("Retrieving " + request.params.name);
+            return("Retrieving " + request.params.name);
         }
     },
     // Update a single tour
@@ -41,7 +61,7 @@ server.route([
         handler: function(request, reply)
         {
             // request.payload variables
-            reply("Updating " + request.params.name);
+            return("Updating " + request.params.name);
         }
     },
     // Delete a single tour
@@ -50,7 +70,7 @@ server.route([
         path: '/api/tours/{name}',
         handler: function(request, reply)
         {
-            reply("Deleting " + request.params.name).code(204);
+            return("Deleting " + request.params.name).code(204);
         }
     },
     // Home page
@@ -59,30 +79,23 @@ server.route([
         path: '/',
         handler: function(request, reply)
         {
-            reply("Hello world from Hapi/Mongo example.")
+            return("Hello world from Hapi/Mongo example.")
         }
     }
 ]);
 
-const MongoClient = mongodb.MongoClient;
-//our host url
-const url = 'mongodb://localhost:27017/';
-// const url = 'mongodb://localhost:27017';
-//specifying out database selection
-const dbName = 'learning_mongo';
-
-//
-const findDocuments = (db, callback) =>
-{
-    //collection we are trying to access
-    const collection = db.collection('tours');
-    //searching within the collection
-    collection.find({"tourPackage": "Snowboard Cali"}).toArray((error, docs) =>
-    {
-        console.log(docs);
-        callback();
-    })
-};
+//finds info with requested data
+// const findDocuments = (db, callback) =>
+// {
+//     //collection we are trying to access
+//     const collection = db.collection('tours');
+//     //searching within the collection
+//     collection.find({"tourPackage": "Snowboard Cali"}).toArray((error, docs) =>
+//     {
+//         console.log(docs);
+//         callback();
+//     })
+// };
 
 
 MongoClient.connect(url, {useNewUrlParser: true}, (err, db) =>
@@ -95,13 +108,19 @@ MongoClient.connect(url, {useNewUrlParser: true}, (err, db) =>
     }
     console.log('Connected to your local hosted MongoDb Server!');
 
-    //database selection
-    const database = db.db(dbName);
+    // database selection
+    // const database = db.db(dbName);
+    database = db.db(dbName);
     //search in the passed database
-    findDocuments(database, () =>
-    {
-        //close the connection to the database
-        db.close();
+    // findDocuments(database, () =>
+    // {
+    //     //close the connection to the database
+    //     db.close();
+    // })
+
+    // collection = database.collection('tours');
+    server.start( (err) => {
+        console.log(`Hapi server started `);
     })
 });
 
